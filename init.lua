@@ -34,10 +34,12 @@ require("lazy").setup({{
 dofile(vim.g.base46_cache .. "defaults")
 dofile(vim.g.base46_cache .. "statusline")
 
+vim.cmd.colorscheme "catppuccin-frappe"
+
 require "nvchad.autocmds"
 
 vim.schedule(function()
     require "mappings"
 end)
 
-vim.cmd.colorscheme "catppuccin-frappe"
+require("neo-tree")
