@@ -110,3 +110,5 @@ require("nvim-web-devicons").setup {
     },
   },
 }
+
+require("fzf-lua").setup {}
