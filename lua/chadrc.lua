@@ -4,7 +4,7 @@
 local M = {}
 
 M.ui = {
-  theme = "catppuccin",
+  theme = "ayu_light",
 
   hl_override = {
     Pmenu = {

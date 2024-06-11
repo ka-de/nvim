@@ -16,9 +16,9 @@ local lazy_config = require "configs.lazy"
 -- load plugins
 require("lazy").setup({
   {
-    "catppuccin/nvim",
-    name = "catppuccin",
-    priority = 1000,
+    "mrcjkb/rustaceanvim",
+    version = "^4", -- Recommended
+    lazy = false, -- This plugin is already lazy
   },
   {
     "NvChad/NvChad",
@@ -38,7 +38,7 @@ require("lazy").setup({
 dofile(vim.g.base46_cache .. "defaults")
 dofile(vim.g.base46_cache .. "statusline")
 
-vim.cmd.colorscheme "catppuccin-macchiato"
+--vim.cmd.colorscheme "catppuccin-macchiato"
 
 require "nvchad.autocmds"
 
@@ -112,3 +112,127 @@ require("nvim-web-devicons").setup {
 }
 
 require("fzf-lua").setup {}
+
+--[[
+require("mason").setup {
+  ui = {
+    icons = {
+      package_installed = "",
+      package_pending = "",
+      package_uninstalled = "",
+    },
+  },
+}
+
+require("mason-lspconfig").setup()
+]]
+--
+
+--[[
+local rt = require "rust-tools"
+
+rt.setup {
+  server = {
+    on_attach = function(_, bufnr)
+      -- Hover actions
+      vim.keymap.set("n", "<C-space>", rt.hover_actions.hover_actions, { buffer = bufnr })
+      -- Code action groups
+      vim.keymap.set("n", "<Leader>a", rt.code_action_group.code_action_group, { buffer = bufnr })
+    end,
+  },
+}
+
+-- LSP Diagnostics Options Setup
+local sign = function(opts)
+  vim.fn.sign_define(opts.name, {
+    texthl = opts.name,
+    text = opts.text,
+    numhl = "",
+  })
+end
+
+sign { name = "DiagnosticSignError", text = "" }
+sign { name = "DiagnosticSignWarn", text = "" }
+sign { name = "DiagnosticSignHint", text = "" }
+sign { name = "DiagnosticSignInfo", text = "" }
+
+vim.diagnostic.config {
+  virtual_text = false,
+  signs = true,
+  update_in_insert = true,
+  underline = true,
+  severity_sort = false,
+  float = {
+    border = "rounded",
+    source = "always",
+    header = "",
+    prefix = "",
+  },
+}
+
+vim.cmd [[
+set signcolumn=yes
+autocmd CursorHold * lua vim.diagnostic.open_float(nil, { focusable = false })
+]]
+--
+
+--[[
+require("ayu").setup {
+  mirage = true, -- Set to `true` to use `mirage` variant instead of `dark` for dark background.
+  terminal = true, -- Set to `false` to let terminal manage its own colors.
+  overrides = {}, -- A dictionary of group names, each associated with a dictionary of parameters (`bg`, `fg`, `sp` and `style`) and colors in hex.
+}
+]]
+--
+
+require("catppuccin").setup {
+  flavour = "latte", -- latte, frappe, macchiato, mocha
+  background = { -- :h background
+    light = "latte",
+    dark = "mocha",
+  },
+  transparent_background = false, -- disables setting the background color.
+  show_end_of_buffer = false, -- shows the '~' characters after the end of buffers
+  term_colors = false, -- sets terminal colors (e.g. `g:terminal_color_0`)
+  dim_inactive = {
+    enabled = false, -- dims the background color of inactive window
+    shade = "dark",
+    percentage = 0.15, -- percentage of the shade to apply to the inactive window
+  },
+  no_italic = false, -- Force no italic
+  no_bold = false, -- Force no bold
+  no_underline = false, -- Force no underline
+  styles = { -- Handles the styles of general hi groups (see `:h highlight-args`):
+    comments = { "italic" }, -- Change the style of comments
+    conditionals = { "italic" },
+    loops = {},
+    functions = {},
+    keywords = {},
+    strings = {},
+    variables = {},
+    numbers = {},
+    booleans = {},
+    properties = {},
+    types = {},
+    operators = {},
+    -- miscs = {}, -- Uncomment to turn off hard-coded styles
+  },
+  color_overrides = {},
+  custom_highlights = {},
+  default_integrations = true,
+  integrations = {
+    cmp = true,
+    gitsigns = true,
+    nvimtree = true,
+    treesitter = true,
+    notify = false,
+    mini = {
+      enabled = true,
+      indentscope_color = "",
+    },
+    -- For more plugins integrations please scroll down (https://github.com/catppuccin/nvim#integrations)
+  },
+}
+
+-- setup must be called before loading
+vim.cmd.colorscheme "catppuccin"
