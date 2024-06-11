@@ -65,10 +65,6 @@ require("nvim-treesitter.configs").setup {
       end
     end,
 
-    -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-    -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-    -- Using this option may slow down your editor, and you may see some duplicate highlights.
-    -- Instead of true it can also be a list of languages
     additional_vim_regex_highlighting = false,
   },
 }
@@ -224,15 +220,20 @@ require("catppuccin").setup {
     cmp = true,
     gitsigns = true,
     nvimtree = true,
+    neotree = true,
     treesitter = true,
-    notify = false,
+    notify = true,
     mini = {
       enabled = true,
       indentscope_color = "",
     },
-    -- For more plugins integrations please scroll down (https://github.com/catppuccin/nvim#integrations)
   },
 }
 
 -- setup must be called before loading
 vim.cmd.colorscheme "catppuccin"
+
+vim.notify = require "notify"
+
+-- 24-bit color
+vim.opt.termguicolors = true

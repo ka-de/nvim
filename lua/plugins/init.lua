@@ -24,6 +24,8 @@ return {
     -- rust-tools
     --{ "simrat39/rust-tools.nvim" },
 
+    -- nvim-notify
+    { "rcarriga/nvim-notify" },
     -- nui
     { "MunifTanjim/nui.nvim" },
 
