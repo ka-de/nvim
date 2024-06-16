@@ -237,3 +237,5 @@ vim.notify = require "notify"
 
 -- 24-bit color
 vim.opt.termguicolors = true
+
+require("lspconfig").lua_ls.setup {}
