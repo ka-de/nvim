@@ -15,6 +15,54 @@ local lazy_config = require "configs.lazy"
 
 -- load plugins
 require("lazy").setup({
+  --[[ ⚠️ Just use :Neotree
+  {
+    "nvim-tree/nvim-tree.lua",
+    lazy = false,
+    version = "*",
+    dependencies = { { "nvim-tree/nvim-web-devicons" } },
+    opts = {
+      sort_by = "case_sensitive",
+      renderer = {
+        group_empty = true,
+        special_files = {},
+      },
+      actions = { open_file = { quit_on_open = false } },
+      filters = { dotfiles = false, git_ignored = false, custom = { "^.DS_Store$", "^\\.git$" } },
+      git = { enable = true, ignore = true, timeout = 500 },
+    },
+    config = function(_, opts)
+      require("nvim-tree").setup(opts)
+    end,
+  },
+  ]]
+  --
+  {
+    "L3MON4D3/LuaSnip",
+    version = "v2.*",
+    build = "make install_jsregexp",
+  },
+  {
+    "hrsh7th/nvim-cmp",
+    event = { "InsertEnter", "CmdlineEnter" },
+    config = function(_, opts)
+      table.insert(opts.sources, { name = "codeium" })
+      require("cmp").setup(opts)
+    end,
+
+    dependencies = {
+      {
+        "jcdickinson/codeium.nvim",
+        config = function()
+          require("codeium").setup {}
+        end,
+      },
+    },
+  },
+  {
+    "smoka7/hop.nvim",
+    version = "*",
+  },
   {
     "mrcjkb/rustaceanvim",
     version = "^4", -- Recommended
@@ -47,6 +95,25 @@ vim.schedule(function()
 end)
 
 require "neo-tree"
+
+local luasnip = require "luasnip"
+local cmp = require "cmp"
+
+cmp.setup {
+  mapping = cmp.mapping.preset.insert {
+    ["<C-b>"] = cmp.mapping.scroll_docs(-4),
+    ["<C-f>"] = cmp.mapping.scroll_docs(4),
+    ["<C-Space>"] = cmp.mapping.complete(),
+    ["<C-e>"] = cmp.mapping.abort(),
+    ["<CR>"] = cmp.mapping.confirm { select = true }, -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+  },
+  sources = cmp.config.sources {
+    { name = "nvim_lsp" },
+    --{ name = "codeium" },
+  },
+}
+
+require("codeium").setup {}
 
 require("nvim-treesitter.configs").setup {
   ensure_installed = { "c", "lua", "vim", "vimdoc", "query" },
@@ -172,15 +239,6 @@ autocmd CursorHold * lua vim.diagnostic.open_float(nil, { focusable = false })
 ]]
 --
 
---[[
-require("ayu").setup {
-  mirage = true, -- Set to `true` to use `mirage` variant instead of `dark` for dark background.
-  terminal = true, -- Set to `false` to let terminal manage its own colors.
-  overrides = {}, -- A dictionary of group names, each associated with a dictionary of parameters (`bg`, `fg`, `sp` and `style`) and colors in hex.
-}
-]]
---
-
 require("catppuccin").setup {
   flavour = "latte", -- latte, frappe, macchiato, mocha
   background = { -- :h background
@@ -219,7 +277,7 @@ require("catppuccin").setup {
   integrations = {
     cmp = true,
     gitsigns = true,
-    nvimtree = true,
+    nvimtree = false,
     neotree = true,
     treesitter = true,
     notify = true,
@@ -230,6 +288,25 @@ require("catppuccin").setup {
   },
 }
 
+-- Hop
+require("hop").setup {
+  keys = "etovxqpdygfblzhckisuran",
+  jump_on_sole_occurrence = false,
+  case_insensitive = false,
+  create_hl_autocmd = true,
+  uppercase_labels = false,
+  current_line_only = false,
+  multi_windows = true,
+}
+
+vim.cmd "command! Ha HopAnywhere"
+vim.cmd "command! Hac HopAnywhereAC"
+vim.cmd "command! Hbc HopAnywhereBC"
+vim.cmd "command! Hl HopAnywhereCurrentLine"
+vim.cmd "command! Hlac HopAnywhereCurrentLineAC"
+vim.cmd "command! Hlbc HopAnywhereCurrentLineBC"
+vim.cmd "command! Hmw HopAnywhereMW"
+
 -- setup must be called before loading
 vim.cmd.colorscheme "catppuccin"
 
@@ -238,4 +315,32 @@ vim.notify = require "notify"
 -- 24-bit color
 vim.opt.termguicolors = true
 
-require("lspconfig").lua_ls.setup {}
+require("lspconfig").lua_ls.setup {
+  on_init = function(client)
+    local path = client.workspace_folders[1].name
+    if vim.loop.fs_stat(path .. "/.luarc.json") or vim.loop.fs_stat(path .. "/.luarc.jsonc") then
+      return
+    end
+
+    client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
+      runtime = {
+        -- Tell the language server which version of Lua you're using
+        -- (most likely LuaJIT in the case of Neovim)
+        version = "LuaJIT",
+      },
+      -- Make the server aware of Neovim runtime files
+      workspace = {
+        checkThirdParty = false,
+        library = {
+          vim.env.VIMRUNTIME,
+          -- Depending on the usage, you might want to add additional paths here.
+          -- "${3rd}/luv/library"
+          -- "${3rd}/busted/library",
+        },
+      },
+    })
+  end,
+  settings = {
+    Lua = {},
+  },
+}
